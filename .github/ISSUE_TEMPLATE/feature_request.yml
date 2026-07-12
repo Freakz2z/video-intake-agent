@@ -1,0 +1,19 @@
+name: Feature request
+description: Suggest an evidence-first improvement to the recording intake workflow.
+title: "feature: "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What recording workflow is currently frustrating?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+      description: Describe inputs, review points, and how filesystem safety is preserved.
+    validations:
+      required: true

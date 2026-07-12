@@ -1,0 +1,29 @@
+name: Bug report
+description: Report a reproducible problem without attaching private recordings.
+title: "bug: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: "Please remove private filenames, media, and metadata before posting."
+  - type: input
+    id: command
+    attributes:
+      label: Command
+      description: The exact command, with paths anonymized.
+    validations:
+      required: true
+  - type: textarea
+    id: output
+    attributes:
+      label: Output
+      description: Include stdout/stderr and expected behavior.
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: OS, Python version, and FFmpeg version.
+    validations:
+      required: true

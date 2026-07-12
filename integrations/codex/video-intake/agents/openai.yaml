@@ -1,0 +1,4 @@
+interface:
+  display_name: "Video Intake"
+  short_description: "Prepare and organize recordings with one command"
+  default_prompt: "Use $video-intake to prepare and organize this video or directory in one command."
