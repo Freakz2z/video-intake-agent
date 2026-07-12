@@ -1,5 +1,7 @@
 # Contributing
 
+[English](CONTRIBUTING.md) · [简体中文](docs/CONTRIBUTING.zh-CN.md)
+
 Thank you for helping make post-recording workflows less painful.
 
 ## Local setup

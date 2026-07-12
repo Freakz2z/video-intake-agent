@@ -13,6 +13,7 @@ All notable changes are documented here.
 - Added package metadata and repeatable source-build validation.
 - Added `doctor`, version reporting, privacy documentation, and an architecture overview.
 - Reworked the public README around the one-command local workflow and open demo only.
+- Added a reusable SVG logo, centered project header, bilingual navigation, a complete Simplified Chinese README, and Chinese contribution guidance.
 
 ## 0.1.0 — 2026-07-12
 

@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 240" role="img" aria-labelledby="title desc">
+  <title id="title">Video Intake Agent</title>
+  <desc id="desc">Video naming, timestamped descriptions, and similarity archiving</desc>
+  <style>
+    .wordmark { fill: #F8FAFC; }
+    .tagline { fill: #94A3B8; }
+  </style>
+  <defs>
+    <linearGradient id="bg" x1="28" y1="20" x2="212" y2="220" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#111C3A"/>
+      <stop offset="1" stop-color="#080C18"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="48" y1="42" x2="194" y2="190" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#22D3EE"/>
+      <stop offset="0.52" stop-color="#3B82F6"/>
+      <stop offset="1" stop-color="#8B5CF6"/>
+    </linearGradient>
+  </defs>
+  <rect x="2" y="2" width="896" height="236" rx="42" fill="#080C18" stroke="#1E293B" stroke-width="4"/>
+  <g transform="translate(8 8) scale(.93)">
+    <rect x="8" y="8" width="224" height="224" rx="54" fill="url(#bg)"/>
+    <rect x="42" y="38" width="156" height="104" rx="24" fill="#0D1730" stroke="url(#accent)" stroke-width="8"/>
+    <g fill="#7DD3FC" opacity="0.92">
+      <rect x="59" y="49" width="16" height="8" rx="4"/>
+      <rect x="85" y="49" width="16" height="8" rx="4"/>
+      <rect x="139" y="49" width="16" height="8" rx="4"/>
+      <rect x="165" y="49" width="16" height="8" rx="4"/>
+    </g>
+    <path d="M103 76.5a8 8 0 0 1 12-6.9l34 19.5a8 8 0 0 1 0 13.8l-34 19.5a8 8 0 0 1-12-6.9v-39Z" fill="url(#accent)"/>
+    <path d="M120 148v31m0 0-14-14m14 14 14-14" fill="none" stroke="#A5B4FC" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M65 174v17a13 13 0 0 0 13 13h84a13 13 0 0 0 13-13v-17" fill="none" stroke="url(#accent)" stroke-width="9" stroke-linecap="round"/>
+  </g>
+  <text x="258" y="108" class="wordmark" font-family="Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="68" font-weight="760" letter-spacing="-2">Video Intake</text>
+  <text x="261" y="159" class="tagline" font-family="Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="26" font-weight="520" letter-spacing=".2">Agent-native post-recording workflow</text>
+  <rect x="261" y="181" width="82" height="6" rx="3" fill="#22D3EE"/>
+  <rect x="351" y="181" width="52" height="6" rx="3" fill="#3B82F6"/>
+  <rect x="411" y="181" width="30" height="6" rx="3" fill="#8B5CF6"/>
+</svg>

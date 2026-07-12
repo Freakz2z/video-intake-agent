@@ -3,7 +3,7 @@ include CODE_OF_CONDUCT.md
 include CHANGELOG.md
 include CONTRIBUTING.md
 include SECURITY.md
-recursive-include docs *.md
+recursive-include docs *.md *.svg
 recursive-include demo *.md *.mp4 *.gif
 recursive-include integrations *.md *.yaml
 recursive-include scripts *.py

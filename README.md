@@ -1,16 +1,31 @@
-# Video Intake Agent
+<div align="center">
+  <img src="docs/assets/logo.svg" alt="Video Intake Agent" width="680" />
 
-[![CI](https://github.com/Freakz2z/video-intake-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/Freakz2z/video-intake-agent/actions/workflows/ci.yml)
-[![Python 3.11+](https://img.shields.io/badge/Python-3.11%2B-3776AB.svg)](https://www.python.org/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/Freakz2z/video-intake-agent/blob/main/LICENSE)
+  <p><strong>One local command for video naming, timestamped descriptions, and similarity-based organization.</strong></p>
+  <p>用一条本地命令完成视频命名、时间戳内容描述与相似素材整理。</p>
 
-One local command to prepare recordings for naming, timestamped description, and similarity-based organization with Codex or Claude Code.
+  <p>
+    <a href="README.md">English</a> ·
+    <a href="docs/README.zh-CN.md">简体中文</a> ·
+    <a href="CONTRIBUTING.md">Contributing</a> ·
+    <a href="docs/CONTRIBUTING.zh-CN.md">贡献指南</a> ·
+    <a href="docs/roadmap.md">Roadmap</a> ·
+    <a href="docs/privacy.md">Privacy</a>
+  </p>
 
-用一条本地命令整理录制文件：生成命名证据、带时间戳的内容分镜，并把视觉上相似的视频归为一组。
+  <p>
+    <a href="https://github.com/Freakz2z/video-intake-agent/actions/workflows/ci.yml"><img src="https://github.com/Freakz2z/video-intake-agent/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
+    <a href="https://www.python.org/"><img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+" /></a>
+    <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-22C55E.svg" alt="MIT License" /></a>
+    <img src="https://img.shields.io/badge/API%20key-not%20required-06B6D4.svg" alt="No API key required" />
+  </p>
+</div>
 
-![Openly licensed Big Buck Bunny demo](https://raw.githubusercontent.com/Freakz2z/video-intake-agent/main/demo/media/preview.gif)
+<p align="center">
+  <img src="https://raw.githubusercontent.com/Freakz2z/video-intake-agent/main/demo/media/preview.gif" alt="Openly licensed Big Buck Bunny demo" width="480" />
+</p>
 
-> v0.2 alpha · Source installation only · No cloud API or API key required
+<p align="center"><sub>v0.2 alpha · Source installation · Local-first · No cloud API required</sub></p>
 
 ## What it does
 
