@@ -12,6 +12,6 @@ video-intake "$ARGUMENTS"
 
 For a video, inspect the returned contact sheet and timeline frames, then prepare factual descriptions and a concise naming proposal.
 
-For a directory, read the returned scan and similarity reports, visually review representative files in every group, and prepare requested batch naming or archive plans.
+For a directory, read the returned scan and similarity reports. Distinguish `exact_duplicate_groups` (byte-identical files) from heuristic visual `groups`, visually review representative files in every visual group, and prepare requested batch naming or archive plans.
 
 Never guess people, brands, or spoken content. Mention when the timestamp falls back to file modification time. Never run an apply command without explicit approval of the exact changes.

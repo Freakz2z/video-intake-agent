@@ -407,14 +407,58 @@ def signature_similarity(left: dict[str, Any], right: dict[str, Any]) -> float:
     return round(0.85 * visual + 0.15 * duration_match, 4)
 
 
+def _read_fingerprint_cache(path: Path) -> dict[str, Any]:
+    if not path.is_file():
+        return {"entries": {}}
+    try:
+        value = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {"entries": {}}
+    if value.get("kind") != "video-intake.fingerprint-cache" or not isinstance(
+        value.get("entries"), dict
+    ):
+        return {"entries": {}}
+    return value
+
+
+def _cache_entry_matches(entry: Any, path: Path, samples: int) -> bool:
+    if not isinstance(entry, dict):
+        return False
+    stat = path.stat()
+    return (
+        entry.get("size_bytes") == stat.st_size
+        and entry.get("mtime_ns") == stat.st_mtime_ns
+        and entry.get("samples") == samples
+        and isinstance(entry.get("signature"), list)
+        and len(entry["signature"]) == samples
+        and isinstance(entry.get("duration_seconds"), (int, float))
+    )
+
+
+def _sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as source:
+        for chunk in iter(lambda: source.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
 def find_similar_videos(
-    directory_value: str, recursive: bool, threshold: float, samples: int, limit: int
+    directory_value: str,
+    recursive: bool,
+    threshold: float,
+    samples: int,
+    limit: int,
+    cache_path: str | None = None,
+    use_cache: bool = True,
 ) -> dict[str, Any]:
     directory = Path(directory_value).expanduser().resolve()
     if not directory.is_dir():
         raise IntakeError(f"找不到目录：{directory}")
     if not 0.5 <= threshold <= 0.99:
         raise IntakeError("--threshold 必须在 0.5 到 0.99 之间。")
+    if not 1 <= samples <= 12:
+        raise IntakeError("--samples 必须在 1 到 12 之间。")
     candidates = sorted(
         path
         for path in (directory.rglob("*") if recursive else directory.glob("*"))
@@ -425,21 +469,108 @@ def find_similar_videos(
             f"发现 {len(candidates)} 个视频，超过 --limit {limit}；请缩小目录或提高上限。"
         )
 
+    resolved_cache_path = (
+        Path(cache_path).expanduser().resolve()
+        if cache_path
+        else directory / ".video-intake" / "fingerprint-cache.json"
+    )
+    cached_entries = (
+        _read_fingerprint_cache(resolved_cache_path).get("entries", {}) if use_cache else {}
+    )
+    updated_entries: dict[str, dict[str, Any]] = {}
+    cache_hits = 0
+    cache_misses = 0
+    invalidated = 0
     items: list[dict[str, Any]] = []
     errors: list[dict[str, str]] = []
     for candidate in candidates:
+        source = str(candidate.resolve())
+        cached = cached_entries.get(source)
         try:
-            evidence = inspect_video(str(candidate))
-            items.append(
-                {
-                    "source": evidence["source"],
-                    "duration_seconds": evidence["video"]["duration_seconds"],
-                    "captured_at": evidence["captured_at"],
-                    "signature": visual_signature(evidence, samples),
+            if use_cache and _cache_entry_matches(cached, candidate, samples):
+                item = {
+                    "source": source,
+                    "duration_seconds": cached["duration_seconds"],
+                    "captured_at": cached.get("captured_at"),
+                    "signature": cached["signature"],
                 }
-            )
-        except IntakeError as exc:
+                updated_entries[source] = dict(cached)
+                items.append(item)
+                cache_hits += 1
+                continue
+            if use_cache:
+                cache_misses += 1
+                invalidated += int(cached is not None)
+            evidence = inspect_video(str(candidate))
+            item = {
+                "source": evidence["source"],
+                "duration_seconds": evidence["video"]["duration_seconds"],
+                "captured_at": evidence["captured_at"],
+                "signature": visual_signature(evidence, samples),
+            }
+            stat = candidate.stat()
+            updated_entries[source] = {
+                "size_bytes": stat.st_size,
+                "mtime_ns": stat.st_mtime_ns,
+                "samples": samples,
+                "duration_seconds": item["duration_seconds"],
+                "captured_at": item["captured_at"],
+                "signature": item["signature"],
+            }
+            items.append(item)
+        except (IntakeError, OSError) as exc:
             errors.append({"source": str(candidate), "error": str(exc)})
+
+    size_buckets: dict[int, list[dict[str, Any]]] = {}
+    for item in items:
+        size = Path(item["source"]).stat().st_size
+        size_buckets.setdefault(size, []).append(item)
+    exact_duplicate_groups: list[dict[str, Any]] = []
+    content_hashes = 0
+    content_hash_hits = 0
+    for size, bucket in size_buckets.items():
+        if len(bucket) < 2:
+            continue
+        hashes: dict[str, list[dict[str, Any]]] = {}
+        for item in bucket:
+            source = item["source"]
+            entry = updated_entries[source]
+            content_hash = entry.get("sha256")
+            if not isinstance(content_hash, str):
+                content_hash = _sha256_file(Path(source))
+                entry["sha256"] = content_hash
+                content_hashes += 1
+            else:
+                content_hash_hits += 1
+            hashes.setdefault(content_hash, []).append(item)
+        for content_hash, duplicates in hashes.items():
+            if len(duplicates) > 1:
+                exact_duplicate_groups.append(
+                    {
+                        "group_id": f"duplicate-{len(exact_duplicate_groups) + 1:03d}",
+                        "sha256": content_hash,
+                        "size_bytes": size,
+                        "members": duplicates,
+                    }
+                )
+
+    cache_written = False
+    cache_write_error = None
+    if use_cache:
+        try:
+            _write_json(
+                resolved_cache_path,
+                {
+                    "schema_version": SCHEMA_VERSION,
+                    "kind": "video-intake.fingerprint-cache",
+                    "directory": str(directory),
+                    "updated_at": datetime.now().astimezone().isoformat(timespec="seconds"),
+                    "entries": updated_entries,
+                },
+            )
+            cache_written = True
+        except OSError as exc:
+            cache_write_error = str(exc)
 
     clusters: list[list[dict[str, Any]]] = []
     for item in items:
@@ -480,11 +611,27 @@ def find_similar_videos(
         "directory": str(directory),
         "threshold": threshold,
         "samples": samples,
+        "exact_duplicate_groups": exact_duplicate_groups,
         "groups": groups,
         "singles": singles,
         "errors": errors,
+        "cache": {
+            "enabled": use_cache,
+            "path": str(resolved_cache_path) if use_cache else None,
+            "hits": cache_hits,
+            "misses": cache_misses,
+            "invalidated": invalidated,
+            "content_hashes_computed": content_hashes,
+            "content_hash_hits": content_hash_hits,
+            "written": cache_written,
+            "write_error": cache_write_error,
+        },
         "summary": {
             "videos": len(candidates),
+            "exact_duplicate_groups": len(exact_duplicate_groups),
+            "exact_duplicate_videos": sum(
+                len(group["members"]) for group in exact_duplicate_groups
+            ),
             "similar_groups": len(groups),
             "grouped_videos": sum(len(group["members"]) for group in groups),
             "single_videos": len(singles),
@@ -929,7 +1076,14 @@ def prepare_target(
         bundle = Path(output_dir).expanduser().resolve() if output_dir else target / ".video-intake"
         bundle.mkdir(parents=True, exist_ok=True)
         scan = scan_directory(str(target), str(bundle / "contact-sheets"), recursive, True, limit)
-        similarity = find_similar_videos(str(target), recursive, threshold, samples, limit)
+        similarity = find_similar_videos(
+            str(target),
+            recursive,
+            threshold,
+            samples,
+            limit,
+            cache_path=str(bundle / "fingerprint-cache.json"),
+        )
         scan_path = bundle / "scan.json"
         similarity_path = bundle / "similarity.json"
         _write_json(scan_path, scan)
@@ -944,6 +1098,7 @@ def prepare_target(
             "similarity_json": str(similarity_path),
             "summary": {
                 "videos": scan["summary"]["videos_found"],
+                "exact_duplicate_groups": similarity["summary"]["exact_duplicate_groups"],
                 "similar_groups": similarity["summary"]["similar_groups"],
                 "grouped_videos": similarity["summary"]["grouped_videos"],
                 "single_videos": similarity["summary"]["single_videos"],
@@ -1029,6 +1184,8 @@ def build_parser() -> argparse.ArgumentParser:
     )
     similar.add_argument("--samples", type=int, default=5, help="每条视频采样帧数 1-12；默认 5")
     similar.add_argument("--limit", type=int, default=100, choices=range(1, 1001), metavar="1-1000")
+    similar.add_argument("--cache-path", help="指纹缓存路径；默认目录/.video-intake/fingerprint-cache.json")
+    similar.add_argument("--no-cache", action="store_true", help="本次不读取或写入持久化指纹缓存")
 
     archive_plan = commands.add_parser("archive-plan", help="从相似度报告生成可审核的归档计划")
     archive_plan.add_argument("similarity_json")
@@ -1113,6 +1270,8 @@ def main() -> None:
                     args.threshold,
                     args.samples,
                     args.limit,
+                    args.cache_path,
+                    not args.no_cache,
                 )
             )
         elif args.command == "archive-plan":

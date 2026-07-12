@@ -17,6 +17,7 @@ from video_intake import (
     build_batch_plan,
     create_timeline,
     doctor,
+    find_similar_videos,
     prepare_target,
     propose_name,
     scan_directory,
@@ -139,6 +140,74 @@ def test_signature_similarity_uses_structure_luminance_and_duration() -> None:
 
     assert signature_similarity(black, same_black) == 1.0
     assert signature_similarity(black, white) < 0.82
+
+
+def test_similarity_cache_reuses_fingerprints_and_invalidates_changed_files(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    source = tmp_path / "clip.mp4"
+    source.write_bytes(b"first version")
+    calls = {"inspect": 0, "signature": 0}
+
+    def fake_inspect(path: str) -> dict:
+        calls["inspect"] += 1
+        return {
+            "source": str(Path(path).resolve()),
+            "captured_at": "2026-07-12T09:05:03+08:00",
+            "video": {"duration_seconds": 10.0},
+        }
+
+    def fake_signature(item: dict, samples: int) -> list[str]:
+        calls["signature"] += 1
+        return ["0000000000000000:20"] * samples
+
+    monkeypatch.setattr(video_intake, "inspect_video", fake_inspect)
+    monkeypatch.setattr(video_intake, "visual_signature", fake_signature)
+    cache = tmp_path / "cache.json"
+
+    first = find_similar_videos(str(tmp_path), False, 0.82, 3, 10, str(cache))
+    second = find_similar_videos(str(tmp_path), False, 0.82, 3, 10, str(cache))
+    source.write_bytes(b"second version is different")
+    third = find_similar_videos(str(tmp_path), False, 0.82, 3, 10, str(cache))
+
+    assert first["cache"]["misses"] == 1
+    assert second["cache"]["hits"] == 1
+    assert third["cache"]["invalidated"] == 1
+    assert calls == {"inspect": 2, "signature": 2}
+
+
+def test_similarity_reports_byte_identical_videos(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    first = tmp_path / "first.mp4"
+    second = tmp_path / "second.mp4"
+    first.write_bytes(b"identical video bytes")
+    shutil.copy2(first, second)
+
+    def fake_inspect(path: str) -> dict:
+        return {
+            "source": str(Path(path).resolve()),
+            "captured_at": "2026-07-12T09:05:03+08:00",
+            "video": {"duration_seconds": 10.0},
+        }
+
+    monkeypatch.setattr(video_intake, "inspect_video", fake_inspect)
+    monkeypatch.setattr(
+        video_intake,
+        "visual_signature",
+        lambda item, samples: ["0000000000000000:20"] * samples,
+    )
+
+    report = find_similar_videos(str(tmp_path), False, 0.99, 2, 10)
+
+    duplicates = report["exact_duplicate_groups"]
+    assert report["summary"]["exact_duplicate_groups"] == 1
+    assert report["summary"]["exact_duplicate_videos"] == 2
+    assert {Path(item["source"]).name for item in duplicates[0]["members"]} == {
+        "first.mp4",
+        "second.mp4",
+    }
+    assert len(duplicates[0]["sha256"]) == 64
 
 
 def test_timeline_frame_cap_still_covers_full_video(
@@ -343,6 +412,8 @@ def test_cli_inspect_plan_and_apply_with_real_video(tmp_path: Path) -> None:
         text=True,
     )
     similarity_report = json.loads(similar.stdout)
+    assert similarity_report["summary"]["exact_duplicate_groups"] == 1
+    assert similarity_report["summary"]["exact_duplicate_videos"] == 2
     assert similarity_report["summary"]["similar_groups"] == 1
     assert similarity_report["summary"]["grouped_videos"] == 2
 

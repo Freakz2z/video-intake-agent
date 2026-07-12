@@ -8,6 +8,11 @@ The project focuses on practical post-recording organization inside Codex and Cl
 - Local visual fingerprints and similar-video clustering.
 - Reviewable, integrity-protected archive plans.
 
+## Shipped on main
+
+- Persistent visual-fingerprint caching with automatic invalidation.
+- Selective SHA-256 exact duplicate detection.
+
 ## v0.3 — Recording review notes
 
 - Create an opt-in Markdown or JSONL issue log per recording.
@@ -24,7 +29,6 @@ The project focuses on practical post-recording organization inside Codex and Cl
 
 - Folder watching with an explicit review queue.
 - Configurable filename templates and project-level defaults.
-- Persistent fingerprint caching and exact duplicate detection.
 
 ## Non-goals
 

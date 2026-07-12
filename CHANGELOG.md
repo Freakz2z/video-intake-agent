@@ -2,6 +2,11 @@
 
 All notable changes are documented here.
 
+## Unreleased
+
+- Added a persistent local fingerprint cache with automatic stat/sample invalidation and cache telemetry.
+- Added selective SHA-256 detection of byte-identical videos alongside heuristic visual groups.
+
 ## 0.2.0 — 2026-07-12
 
 - Added timestamped storyboard extraction and Markdown timeline rendering.

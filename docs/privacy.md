@@ -7,10 +7,10 @@ Video Intake Agent is local-first. Its core CLI does not upload media, call an A
 - Source videos
 - FFprobe metadata
 - Contact sheets and storyboard frames
-- Visual fingerprints and similarity reports
+- Visual fingerprints, SHA-256 content hashes, cache statistics, and similarity reports
 - Rename and archive plans
 
-Generated evidence is stored under `.video-intake/` by default. These files can contain thumbnails, absolute filesystem paths, timestamps, and other information derived from the source media. Treat the evidence directory as private and do not publish it without review.
+Generated evidence is stored under `.video-intake/` by default. These files can contain thumbnails, absolute filesystem paths, timestamps, visual fingerprints, and other information derived from the source media. The fingerprint cache does not contain video frames, but it still reveals filenames and local paths. Treat the evidence directory as private and do not publish it without review.
 
 ## Agent responsibility
 

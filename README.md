@@ -39,7 +39,7 @@ video or directory
 
 - Prepares video metadata, contact sheets, and timestamped storyboard frames.
 - Builds Agent-readable JSON for factual naming and Markdown timelines.
-- Computes multi-frame visual fingerprints locally and groups similar recordings.
+- Computes multi-frame visual fingerprints locally, caches them, and separates exact duplicates from similar recordings.
 - Generates collision-safe rename and archive plans with rollback attempts.
 - Never uploads media. The repository contains only the attributed open-movie demo under `demo/`.
 
@@ -66,7 +66,7 @@ On Windows, activate with `.venv\Scripts\activate`.
 The one-command workflow is read-only with respect to source videos:
 
 - A video produces `inspect.json`, a contact sheet, storyboard frames, and `timeline.json`.
-- A directory produces `scan.json`, contact sheets, and `similarity.json`.
+- A directory produces `scan.json`, contact sheets, `similarity.json`, and a reusable fingerprint cache.
 - Outputs go into a hidden `.video-intake/` directory beside the input.
 
 ## Use it from an Agent
@@ -92,6 +92,7 @@ Expected result:
 
 - `bunny-meets-rodents.mp4` and its re-encoded color variant form one group at about `0.98` similarity.
 - `forest-chase.mp4` remains separate.
+- Running the command again reuses unchanged fingerprints instead of decoding every video again.
 - Timeline frames can be described and rendered without sending video to an external service.
 
 See the [demo guide](https://github.com/Freakz2z/video-intake-agent/blob/main/demo/README.md) and [media attribution](https://github.com/Freakz2z/video-intake-agent/blob/main/demo/ATTRIBUTION.md).
@@ -105,7 +106,7 @@ See the [demo guide](https://github.com/Freakz2z/video-intake-agent/blob/main/de
 | `video-intake inspect <video>` | Create metadata and a contact sheet | No |
 | `video-intake timeline <video>` | Extract timestamped storyboard frames | No |
 | `video-intake render-timeline <json>` | Render Agent descriptions to Markdown | No |
-| `video-intake similar <directory>` | Group videos by local visual fingerprints | No |
+| `video-intake similar <directory>` | Find exact duplicates and group visually similar videos | No |
 | `video-intake propose <video>` | Generate a rename proposal | No |
 | `video-intake plan <requests.json>` | Generate a batch rename plan | No |
 | `video-intake archive-plan <report.json>` | Generate a similarity archive plan | No |
@@ -120,6 +121,7 @@ Run `video-intake <command> --help` for all options.
 - Proposals do not imply permission to rename or move files.
 - Existing destinations are never overwritten.
 - Archive plans include an integrity digest; batch failures attempt rollback.
+- Fingerprint cache entries are invalidated automatically when file size, modification time, or sample count changes.
 - Visual similarity is heuristic. Review groups before applying an archive plan.
 
 Read the full [privacy model](https://github.com/Freakz2z/video-intake-agent/blob/main/docs/privacy.md) and [architecture](https://github.com/Freakz2z/video-intake-agent/blob/main/docs/architecture.md).
@@ -127,7 +129,6 @@ Read the full [privacy model](https://github.com/Freakz2z/video-intake-agent/blo
 ## Current limits
 
 - No speech transcription yet.
-- No persistent fingerprint cache, so large directories take longer on repeated runs.
 - No background folder watcher.
 - Timestamped issue/retake notes are planned but not yet implemented.
 
