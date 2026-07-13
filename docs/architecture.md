@@ -14,7 +14,7 @@ local video(s)
        evidence JSON bundle
              │
              ▼
-      Codex / Claude Code
+  Codex / Claude Code / Cursor
              │
              ▼
      reviewable rename, timeline,
@@ -24,6 +24,25 @@ local video(s)
              ▼
       guarded filesystem action
 ```
+
+## MCP boundary
+
+The optional `video-intake-mcp` process exposes the same core functions through the official MCP Python SDK. MCP hosts connect over local stdio by default; Streamable HTTP is available for loopback development.
+
+```text
+MCP host
+  ├─ tools: evidence, analysis, plans, confirmed apply
+  ├─ resource: shared workflow contract
+  └─ prompt: evidence-review template
+             │
+             ▼
+ filesystem scope guard (optional allowed roots)
+             │
+             ▼
+ deterministic video_intake core
+```
+
+Tool annotations advertise read-only, local-write, and destructive behavior. Enforcement does not depend on those hints: single renames require the exact reviewed destination, saved batch plans require their exact SHA-256, and the core revalidates collisions, plan structure, archive integrity, and rollback conditions at execution time.
 
 ## Data contracts
 

@@ -14,11 +14,13 @@ Generated evidence is stored under `.video-intake/` by default. These files can 
 
 ## Agent responsibility
 
-Codex or Claude Code provides semantic visual understanding. Video Intake Agent does not control the data-handling policy of the Agent runtime. Review the runtime's privacy settings before asking it to inspect confidential material.
+Codex, Claude Code, Cursor, or another MCP host provides semantic visual understanding. Video Intake Agent does not control the data-handling policy of the Agent runtime. Review the runtime's privacy settings before asking it to inspect confidential material.
+
+The MCP server returns local paths, metadata, contact-sheet paths, and plan content to the connected host. Set `VIDEO_INTAKE_ALLOWED_ROOTS` to restrict the filesystem scope available through MCP. This is an application-level path boundary, not an operating-system sandbox; run the server with an appropriately restricted user account when handling untrusted hosts.
 
 ## Network behavior
 
-The installed `video-intake` command performs no network requests. The optional `scripts/build_demo_assets.py` script downloads the openly licensed *Big Buck Bunny* source only when a contributor explicitly runs it.
+The installed `video-intake` command and the default stdio MCP transport perform no network requests. Optional Streamable HTTP mode opens a local listener and has no built-in authentication; keep it on the default loopback address unless you add a production authentication and transport-security layer. The optional `scripts/build_demo_assets.py` script downloads the openly licensed *Big Buck Bunny* source only when a contributor explicitly runs it.
 
 ## Repository media
 

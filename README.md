@@ -7,6 +7,7 @@
   <p>
     <a href="README.md">English</a> ·
     <a href="docs/README.zh-CN.md">简体中文</a> ·
+    <a href="docs/mcp.md">MCP</a> ·
     <a href="CONTRIBUTING.md">Contributing</a> ·
     <a href="docs/CONTRIBUTING.zh-CN.md">贡献指南</a> ·
     <a href="docs/roadmap.md">Roadmap</a> ·
@@ -75,10 +76,20 @@ Bundled integrations:
 
 - [Codex skill](https://github.com/Freakz2z/video-intake-agent/tree/main/integrations/codex/video-intake)
 - [Claude Code command](https://github.com/Freakz2z/video-intake-agent/blob/main/integrations/claude-code/commands/video-intake.md)
+- [MCP Server](https://github.com/Freakz2z/video-intake-agent/blob/main/docs/mcp.md) with 12 structured tools, a workflow resource, and a reusable review prompt
 
 Or give either Agent this instruction:
 
 > Run `video-intake <path>`, inspect the generated evidence, and prepare factual descriptions and organization proposals. Do not apply filesystem changes until I approve the exact paths.
+
+Install and verify the MCP integration:
+
+```bash
+python -m pip install -e '.[mcp]'
+video-intake-mcp-client
+```
+
+The server uses local stdio by default, supports an optional filesystem allowlist, and requires exact path or SHA-256 confirmation before write actions. See the [MCP guide](docs/mcp.md) for Codex and Claude Code setup.
 
 ## Reproducible demo
 

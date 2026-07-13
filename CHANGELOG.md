@@ -4,6 +4,10 @@ All notable changes are documented here.
 
 ## Unreleased
 
+- Added an official-SDK MCP Server with 12 structured tools, a workflow resource, and a reusable review prompt.
+- Added stdio and loopback Streamable HTTP transports plus an end-to-end MCP verification client.
+- Added optional filesystem-root scoping and exact path/SHA-256 confirmation for MCP write actions.
+- Added in-memory protocol tests and bilingual Codex/Claude Code setup documentation.
 - Added a persistent local fingerprint cache with automatic stat/sample invalidation and cache telemetry.
 - Added selective SHA-256 detection of byte-identical videos alongside heuristic visual groups.
 

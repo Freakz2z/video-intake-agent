@@ -33,4 +33,7 @@ jobs:
       - name: Build package
         run: python -m build
       - name: Verify command installation
-        run: video-intake --help
+        run: |
+          video-intake --help
+          video-intake-mcp --help
+          video-intake-mcp-client

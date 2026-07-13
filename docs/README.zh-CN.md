@@ -6,6 +6,7 @@
   <p>
     <a href="../README.md">English</a> ·
     <a href="README.zh-CN.md">简体中文</a> ·
+    <a href="mcp.zh-CN.md">MCP</a> ·
     <a href="../CONTRIBUTING.md">Contributing</a> ·
     <a href="CONTRIBUTING.zh-CN.md">贡献指南</a> ·
     <a href="roadmap.md">Roadmap</a> ·
@@ -75,10 +76,20 @@ Windows 激活命令为 `.venv\Scripts\activate`。
 
 - [Codex Skill](../integrations/codex/video-intake/SKILL.md)
 - [Claude Code 命令](../integrations/claude-code/commands/video-intake.md)
+- [MCP Server](mcp.zh-CN.md)：提供 12 个结构化 Tool、工作流 Resource 和可复用审核 Prompt
 
 也可以直接告诉 Agent：
 
 > 对这个视频或目录运行 `video-intake <路径>`，检查生成的证据，准备准确的内容描述与整理建议。除非我明确批准具体路径，否则不要执行文件改名或移动。
+
+安装并验证 MCP 接入：
+
+```bash
+python -m pip install -e '.[mcp]'
+video-intake-mcp-client
+```
+
+Server 默认通过本地 stdio 运行，可配置文件系统允许目录；所有写操作都要求精确目标路径或计划 SHA-256 确认。Codex 与 Claude Code 的配置方式见 [MCP 接入说明](mcp.zh-CN.md)。
 
 ## 可复现演示
 
